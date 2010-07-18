@@ -12,8 +12,8 @@ my $amqp = Net::RabbitMQ::Simple->new();
 $amqp->connect;
 $amqp->channel(1);
 
-$amqp->exchange_name("nsms_api");
-$amqp->queue_declare('nsms_api');
+$amqp->exchange_name("foo_api");
+$amqp->queue_declare('foo_api');
 
 $amqp->consume(); 
 

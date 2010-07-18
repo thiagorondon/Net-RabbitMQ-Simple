@@ -4,10 +4,17 @@ use Moose;
 
 use FindBin qw($Bin);
 use lib "$Bin/lib";
+use JSON;
 
 use Net::RabbitMQ::Simple;
 
 my $amqp = Net::RabbitMQ::Simple->new();
+
+my %message = (
+    foo => 'abcdef',
+    bar => '123456',
+    baz => [1, 4, 5]
+);
 
 =head1 connect
 
@@ -39,7 +46,7 @@ $amqp->channel(1);
 
 =cut
 
-$amqp->exchange_declare('nsms_api');
+$amqp->exchange_declare('foo_api');
 
 =head1
 
@@ -47,7 +54,7 @@ $amqp->exchange_declare('nsms_api');
     argv1 - name of queue.
 =cut
 
-$amqp->queue_declare('nsms_api');
+$amqp->queue_declare('foo_api');
 
 =head1
 
@@ -57,7 +64,7 @@ $amqp->queue_declare('nsms_api');
 
 =cut
 
-$amqp->queue_bind('nsms_api_route');
+$amqp->queue_bind('foo_api_route');
 
 =head1
 
@@ -65,7 +72,7 @@ $amqp->queue_bind('nsms_api_route');
 
 =cut
 
-$amqp->publish('foo');
+$amqp->publish(to_json(\%message));
 
 # TODO
 # content_type, encoding, reply_to, expiration, message_id, delivery_mode

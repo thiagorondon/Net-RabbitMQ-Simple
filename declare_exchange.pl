@@ -10,8 +10,7 @@ use Net::RabbitMQ::Simple;
 my $amqp = Net::RabbitMQ::Simple->new();
 $amqp->connect;
 $amqp->channel(1);
-$amqp->exchange_name("nsms_api");
-$amqp->exchange_declare();
+$amqp->exchange_declare("foo_api");
 
 $amqp->disconnect();
 
