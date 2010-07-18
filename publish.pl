@@ -46,7 +46,7 @@ $amqp->channel(1);
 
 =cut
 
-$amqp->exchange_declare('foo_api');
+$amqp->exchange_declare('foobar');
 
 =head1
 
@@ -54,7 +54,7 @@ $amqp->exchange_declare('foo_api');
     argv1 - name of queue.
 =cut
 
-$amqp->queue_declare('foo_api');
+$amqp->queue_declare('baz');
 
 =head1
 
@@ -64,7 +64,7 @@ $amqp->queue_declare('foo_api');
 
 =cut
 
-$amqp->queue_bind('foo_api_route');
+$amqp->queue_bind('baz_route');
 
 =head1
 
@@ -86,8 +86,6 @@ $amqp->publish(to_json(\%message));
 =cut
 
 $amqp->disconnect();
-
-1;
 
 
 1;
