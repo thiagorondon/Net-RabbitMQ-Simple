@@ -156,6 +156,7 @@ has 'no_ack' => (is => 'rw', isa => 'Bool', default => 1);
 has 'exclusive' => (is => 'rw', isa => 'Bool', default => 0);
 
 method consume () {
+    # todo: check is the channel is open.
     $self->conn->consume($self->channel, $self->queue_name);
 }
 
