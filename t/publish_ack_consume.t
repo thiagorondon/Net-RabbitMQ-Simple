@@ -16,18 +16,38 @@ my $mq = mqconnect {
 
 publish $mq, {
     exchange => 'mtest_x',
-    queue => 'mtest',
+    queue => 'mtest_ack',
+    queue_options => { passive => 0, durable => 1, exclusive => 0, auto_delete => 0 },
     route => 'mtest_route',
-    message => 'message',
+    ack => 1,
+    message => 'message2',
     options => { content_type => 'text/plain' }
 };
 
-consume $mq;
+consume $mq, { ack => 1 };
 
 my $rv = {};
 $rv = $mq->recv();
-ok($rv);
+$rv->{delivery_tag} = 10;
 $mq->disconnect;
+
+$mq = mqconnect {
+    hostname => $host,
+};
+
+consume $mq, {
+    exchange => 'mtest_x',
+    ack => 1,
+    queue => 'mtest_ack'
+};
+
+$rv = $mq->recv();
+my $acktag = $rv->{delivery_tag};
+$rv->{delivery_tag} = 10;
+ack $mq, $acktag;
+ok($rv);
+
+$mq->disconnect();
 
 1;
 
