@@ -1,0 +1,73 @@
+NAME
+    Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
+
+VERSION
+    This document describes NET::RabbitMQ::Simple version 0.0002
+
+SYNOPSIS
+        use Net::RabbitMQ::Simple;
+
+        my $mq = mqconnect {
+            hostname => 'localhost',
+            user => 'guest',
+            password => 'guest',
+            vhost => '/'
+        };
+
+        exchange $mq, {
+            exchange => 'mtest_x',
+            type => 'direct',
+            passive => 0,
+            durable => 1,
+            auto_delete => 0,
+            exclusive => 0
+        };
+
+        publish $mq, {
+            exchange => 'maketest',
+            queue => 'mtest',
+            route => 'mtest_route',
+            message => 'message',
+            options => { content_type => 'text/plain' }
+        };
+
+        consume $mq;
+        my $rv = $mq->recv();
+        
+    # use Data::Dumper;
+        # print Dumper($rv);
+
+        mqdisconnect $mq;
+
+DESCRIPTION
+    This package implements a simple syntax on top of Net::RabbitMQ. With
+    the help of this package it is possible to write simple AMQP
+    applications with a few lines of perl code.
+
+SUPPORT
+    *   RT: CPAN's request tracker
+
+        <http://rt.cpan.org/tbr/Bugs.html?Dist=Net-RabbitMQ-Simple>
+
+    *   AnnoCPAN: Annotated CPAN documentation
+
+        <http://annocpan.org/dist/Net-RabbitMQ-Simple>
+
+    *   CPAN Ratings
+
+        <http://cpanratings.perl.org/d/Net-RabbitMQ-Simple>
+
+    *   Search CPAN
+
+        <http://search.cpan.org/dist/Net-RabbitMQ-Simple>
+
+SEE ALSO
+    Net::RabbitMQ, Devel::Declare
+
+AUTHOR
+    Thiago Rondon. <thiago@aware.com.br>
+
+LICENSE AND COPYRIGHT
+    This module is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself. See perlartistic.
+
