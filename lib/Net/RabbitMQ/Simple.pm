@@ -1,172 +1,184 @@
+
 package Net::RabbitMQ::Simple;
+our $VERSION = "0.0002";
 
 use Moose;
-use Net::RabbitMQ;
-use Moose::Util::TypeConstraints;
-use MooseX::Method::Signatures;
+use 5.008001;
+use Devel::Declare ();
+extends 'Devel::Declare::Context::Simple';
 
-use namespace::autoclean;
+use aliased 'Net::RabbitMQ::Simple::Wrapper';
 
-# conn object.
-has conn => (is => 'rw', isa => 'Object');
-
-# connect options.
-has hostname => (
-    is => 'rw', 
-    isa => 'Str', 
-    default => '127.0.0.1',
-);
-
-has username => (is => 'rw', isa => 'Str', default => 'guest');
-has password => (is => 'rw', isa => 'Str', default => 'guest');
-has vhost => (is => 'rw', isa => 'Str', default => '/');
-has channel_max => (is => 'rw', isa => 'Int', default => 0);
-has frame_max => (is => 'rw', isa =>  'Int', default => 131072);
-has heartbeat => (is => 'rw', isa => 'Int', default => 0);
-
-# validates from rabbitfoot
-sub _validate_vhost {
-    my ($self) = @_;
-    die 'vhost', "\n" if 255 < length($self->vhost)
-        || $self->vhost !~ m{^[a-zA-Z0-9/\-_]+$};
+sub mqconnect (@_) {
+    my $mq = Wrapper->new(@_);
+    $mq->connect;
+    $mq->channel(1); #TODO
+    return $mq;
 }
 
-sub _check_shortstr {
-    my ($self, $arg) = @_;
+sub exchange (@_) {
+    my ($mq, $opt) = @_;
+    
+    my $exchange = $opt->{exchange};
+    die "please give the exchange name" if !$exchange;
+    delete $opt->{exchange};
 
-    die $arg, "\n" if 255 < length($self->$arg)
-        || $self->$arg !~ m{^[a-zA-Z0-9-_.:]+$};
+    $mq->exchange_declare($exchange, %{$opt});
 }
 
-sub _validate_routing_key {
-    my ($self,) = @_;
+sub publish (@_) {
+    my ($mq, $opt) = @_;
+   
+    $mq->exchange_name($opt->{exchange}) if $opt->{exchange};
 
-    return if !$self->routing_key;
-    die 'routing_key', "\n" if 255 < length($self->routing_key);
+    $mq->queue_declare($opt->{queue}, %{$opt->{queue_options}});
+    $mq->queue_bind($opt->{route});
+
+    map { $mq->$_($opt->{$_}) if defined($opt->{$_}) }
+        qw/mandatory immediate/;
+    
+    # ACKs
+    $mq->purge($mq->queue_name) if defined($opt->{ack}) and $opt->{ack} == 1;
+
+    $mq->publish($opt->{message}, %{$opt->{options}});
+}
+
+sub consume (@_) {
+    my ($mq, $opt) = @_;
+   
+    $mq->exchange_name($opt->{exchange}) if defined($opt->{exchange});
+    $mq->queue_declare($opt->{queue}) if defined($opt->{queue});
+    
+    $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
+
+    $mq->consume;
+}
+
+sub purge (@_) { shift->purge(@_) }
+sub ack (@_) { shift->ack(@_) }
+sub mqdisconnect(@_) { shift->disconnect(@_) }
+
+sub import {
+    my $class = shift;
+    my $caller = caller;
+    my $ctx = __PACKAGE__->new;
+
+    my @cmds = ( 'mqconnect', 'publish', 'consume', 'purge', 'ack',
+        'mqdisconnect', 'exchange');
+
+    Devel::Declare->setup_for(
+        $caller, {
+            map { $_ => { const => sub { $ctx->parser(@_) } } } @cmds
+        }
+    );
+
+    no strict 'refs';
+    map { *{$caller."::$_"} = \&$_ } @cmds;
+}
+
+sub parser {
+    my $self = shift;
+    $self->init(@_);
+    $self->skip_declarator;
+
+    my $name = $self->strip_name;
+    my $proto = $self->strip_proto;
+    
+    # TODO
+
     return;
 }
 
-# connect 
-method connect {
-    my $mq = Net::RabbitMQ->new();
-    $self->_validate_vhost;
-    $mq->connect($self->hostname,
-        {
-        user => $self->username,
-        password => $self->password,
-        vhost => $self->vhost,
-        channel_max => $self->channel_max,
-        frame_max => $self->frame_max,
-        hearbeat => $self->heartbeat
-        });
-    $self->conn($mq) ? 0 : 1;
-}
-
-# channel options
-has channel => (is => 'rw', isa => 'Int', default => 1);
-
-after channel => sub {
-    my ($self, $argv) = @_;
-    $self->conn->channel_open($argv) if $argv;
-};
-
-# exchange options
-enum 'Exchange' => qw/direct topic/;
-has exchange_type => (is => 'rw', isa => 'Exchange', default => 'direct');
-has exchange_name => (is => 'rw', isa => 'Str');
-has passive => (is => 'rw', isa => 'Bool', default => 0);
-has durable => (is => 'rw', isa => 'Bool', default => 1);
-has auto_delete => (is => 'rw', isa => 'Bool', default => 1);
-
-after exchange_name => sub {
-    my ($self, $argv) = @_;
-    $self->_check_shortstr('exchange_name') if $argv;
-};
-
-method exchange_declare (Str $exchange_name) {
-    $self->exchange_name($exchange_name);
-    $self->conn->exchange_declare(
-        $self->channel, $self->exchange_name, 
-            {
-                exchange_type => $self->exchange_type,
-                passive => $self->passive,
-                durable => $self->durable,
-                auto_delete => $self->auto_delete
-            }
-        );
-}
-
-# queue
-has 'queue_name' => (is => 'rw', isa => 'Str');
-has 'routing_key' => (is => 'rw', isa => 'Str', default => '#');
-
-after 'routing_key' => sub {
-    my ($self, $argv) = shift;
-    $self->_validate_routing_key if $argv;
-};
-
-method queue_declare (Str $queue_name = '') {
-    $self->queue_name($queue_name);
-    $self->conn->queue_declare($self->channel, $queue_name,
-            {
-                exchange_type => $self->exchange_type,
-                passive => $self->passive,
-                durable => $self->durable,
-                auto_delete => $self->auto_delete
-            }
-        );
-}
-
-method queue_bind (Str $routing_key = '#') {
-    $routing_key ||= $self->routing_key;
-    $self->routing_key($routing_key);
-    $self->conn->queue_bind($self->channel, $self->queue_name,
-        $self->exchange_name, $routing_key);
-}
-
-method queue_unbind (Str $routing_key = '#') {
-    $self->conn->queue_bind($self->channel, $self->queue_name,
-        $routing_key);
-}
-
-
-
-# publish
-has 'body' => (is => 'rw', isa => 'Str');
-has 'mandatory' => (is => 'rw', isa => 'Bool', default => 0);
-has 'immediate' => (is => 'rw', isa => 'Bool', default => 0);
-
-method publish ($body) {
-    
-    $self->conn->publish($self->channel, $self->routing_key, $body,
-        {
-            exchange => $self->exchange_name,
-            mandatory => $self->mandatory,
-            immediate => $self->immediate
-        },
-        # TODO
-    );
-
-}
-
-#consume
-has 'consumer_tag' => (is => 'rw', isa => 'Str', default => 'absent');
-has 'no_local' => (is => 'rw', isa => 'Bool', default => 0);
-has 'no_ack' => (is => 'rw', isa => 'Bool', default => 1);
-has 'exclusive' => (is => 'rw', isa => 'Bool', default => 0);
-
-method consume () {
-    # todo: check is the channel is open.
-    $self->conn->consume($self->channel, $self->queue_name);
-}
-
-method recv () {
-    $self->conn->recv();
-}
-
-method disconnect() {
-    $self->conn->disconnect();
-}
-
 1;
+
+__END__
+
+=head1 NAME
+
+Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
+
+=head1 VERSION
+
+This document describes NET::RabbitMQ::Simple version 0.0002
+
+=head1 SYNOPSIS
+
+
+    use Net::RabbitMQ::Simple;
+
+    my $mq = mqconnect {
+        hostname => 'localhost',
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
+    };
+
+    exchange $mq, {
+        exchange => 'mtest_x',
+        type => 'direct',
+        passive => 0,
+        durable => 1,
+        auto_delete => 0,
+        exclusive => 0
+    };
+
+    publish $mq, {
+        exchange => 'maketest',
+        queue => 'mtest',
+        route => 'mtest_route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
+
+    consume $mq;
+    my $rv = $mq->recv();
+    
+    # use Data::Dumper;
+    # print Dumper($rv);
+
+    mqdisconnect $mq;
+
+=head1 DESCRIPTION
+
+This package implements a simple syntax on top of L<Net::RabbitMQ>. With the
+help of this package it is possible to write simple AMQP applications with a
+few lines of perl code.
+
+=head1 SUPPORT
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/tbr/Bugs.html?Dist=Net-RabbitMQ-Simple>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Net-RabbitMQ-Simple>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Net-RabbitMQ-Simple>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Net-RabbitMQ-Simple>
+
+=back
+
+=head1 SEE ALSO
+
+L<Net::RabbitMQ>, L<Devel::Declare>
+
+=head1 AUTHOR
+
+Thiago Rondon. <thiago@aware.com.br>
+
+=head1 LICENSE AND COPYRIGHT
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself. See L<perlartistic>.
+
+=cut
+
 
