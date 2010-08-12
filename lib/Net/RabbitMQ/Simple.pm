@@ -51,8 +51,20 @@ sub consume (@_) {
     
     $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
 
-    $mq->consume;
+    $mq->consume($opt->{options} || ());
 }
+
+sub get (@_) {
+    my ($mq, $opt) = @_;
+   
+    $mq->exchange_name($opt->{exchange}) if defined($opt->{exchange});
+    $mq->queue_declare($opt->{queue}) if defined($opt->{queue});
+    
+    $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
+
+    $mq->get($opt->{options} || ());
+}
+
 
 sub purge (@_) { shift->purge(@_) }
 sub ack (@_) { shift->ack(@_) }
@@ -64,7 +76,7 @@ sub import {
     my $ctx = __PACKAGE__->new;
 
     my @cmds = ( 'mqconnect', 'publish', 'consume', 'purge', 'ack',
-        'mqdisconnect', 'exchange');
+        'mqdisconnect', 'exchange', 'get');
 
     Devel::Declare->setup_for(
         $caller, {
