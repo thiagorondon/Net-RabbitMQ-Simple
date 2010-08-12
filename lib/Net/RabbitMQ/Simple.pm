@@ -5,6 +5,8 @@ our $VERSION = "0.0002";
 use Moose;
 use 5.008001;
 use Devel::Declare ();
+use Carp qw/ confess /;
+
 extends 'Devel::Declare::Context::Simple';
 
 use aliased 'Net::RabbitMQ::Simple::Wrapper';
@@ -20,11 +22,21 @@ sub exchange (@_) {
     my ($mq, $opt) = @_;
     
     my $exchange = $opt->{exchange};
-    die "please give the exchange name" if !$exchange;
+    Carp::confess("please give the exchange name") if !$exchange;
     delete $opt->{exchange};
 
     $mq->exchange_declare($exchange, %{$opt});
 }
+
+sub exchange_delete (@_) {
+    my ($mq, $opt) = @_;
+    
+    my $exchange = $opt->{exchange};
+    Carp::confess("please give the exchange name") if !$exchange;
+
+    $mq->exchange_delete($exchange, %{$opt->{options}});
+}
+
 
 sub publish (@_) {
     my ($mq, $opt) = @_;
@@ -77,7 +89,7 @@ sub import {
     my $ctx = __PACKAGE__->new;
 
     my @cmds = ( 'mqconnect', 'publish', 'consume', 'purge', 'ack',
-        'mqdisconnect', 'exchange', 'get');
+        'mqdisconnect', 'exchange', 'get', 'exchange_delete');
 
     Devel::Declare->setup_for(
         $caller, {

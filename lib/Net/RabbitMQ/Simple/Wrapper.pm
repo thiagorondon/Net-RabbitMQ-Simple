@@ -143,10 +143,6 @@ for my $item (qw/consume get/) {
     }
 }
 
-method recv () {
-    $self->conn->recv();
-}
-
 method purge ($purge) {
     $self->conn->purge($self->channel, $purge);
 }
@@ -155,9 +151,16 @@ method ack ($tag) {
     $self->conn->ack($self->channel, $tag);
 }
 
-method disconnect() {
-    $self->conn->disconnect();
+method exchange_delete ($exchange, %props) {
+#    $self->conn->exchange_delete($self->channel, $exchange, { %props });
 }
+
+for my $item (qw/recv disconnect/) {
+    method "$item" () {
+        $self->conn->$item();
+    }
+}
+
 
 1;
 
