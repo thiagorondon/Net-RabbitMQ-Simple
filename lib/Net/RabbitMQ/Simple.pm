@@ -52,6 +52,7 @@ sub consume (@_) {
     $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
 
     $mq->consume($opt->{options} || ());
+    $mq->recv();
 }
 
 sub get (@_) {

@@ -24,10 +24,9 @@ publish $mq, {
     options => { content_type => 'text/plain' }
 };
 
-consume $mq, { ack => 1 };
-
 my $rv = {};
-$rv = $mq->recv();
+$rv = consume $mq, { ack => 1 };
+
 $rv->{delivery_tag} = 10;
 $mq->disconnect;
 
@@ -35,13 +34,12 @@ $mq = mqconnect {
     hostname => $host,
 };
 
-consume $mq, {
+$rv = consume $mq, {
     exchange => 'mtest_x',
     ack => 1,
     queue => 'mtest_ack'
 };
 
-$rv = $mq->recv();
 my $acktag = $rv->{delivery_tag};
 $rv->{delivery_tag} = 10;
 ack $mq, $acktag;

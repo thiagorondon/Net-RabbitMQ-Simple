@@ -4,16 +4,18 @@ use Moose;
 use Net::RabbitMQ;
 use Moose::Util::TypeConstraints;
 use MooseX::Method::Signatures;
+use Carp qw/ confess /;
 use namespace::autoclean;
 
-# conn object.
-has conn => (is => 'rw', isa => 'Object');
+has conn => (
+    is => 'rw', 
+    isa => 'Object'
+);
 
-# connect options.
 has hostname => (
     is => 'rw', 
     isa => 'Str', 
-    default => '127.0.0.1',
+    default => 'localhost',
 );
 
 has user => (is => 'rw', isa => 'Str', default => 'guest');
@@ -24,25 +26,20 @@ has frame_max => (is => 'rw', isa =>  'Int', default => 131072);
 has heartbeat => (is => 'rw', isa => 'Int', default => 0);
 
 # validates from rabbitfoot
-sub _validate_vhost {
-    my ($self) = @_;
-    die 'vhost', "\n" if 255 < length($self->vhost)
+method _validate_vhost {
+    Carp::confess("vhost has length > 255") if 255 < length($self->vhost)
         || $self->vhost !~ m{^[a-zA-Z0-9/\-_]+$};
 }
 
-sub _check_shortstr {
-    my ($self, $arg) = @_;
-
-    die $arg, "\n" if 255 < length($self->$arg)
+method _check_shortstr ($arg) {
+    Carp::confess($self->arg . "has length > 255") if 255 < length($self->$arg)
         || $self->$arg !~ m{^[a-zA-Z0-9-_.:]+$};
 }
 
-sub _validate_routing_key {
-    my ($self,) = @_;
-
+method _validate_routing_key {
     return if !$self->routing_key;
-    die 'routing_key', "\n" if 255 < length($self->routing_key);
-    return;
+    Carp::confess('routing_key has length > 255') 
+        if 255 < length($self->routing_key);
 }
 
 # connect 
@@ -107,8 +104,8 @@ method queue_bind (Str $routing_key = '#') {
 }
 
 method queue_unbind (Str $routing_key = '#') {
-#    $self->conn->queue_unbind($self->channel, $self->queue_name,
-#        $routing_key);
+    $self->conn->queue_unbind($self->channel, $self->queue_name,
+                $self->exchange_name, $routing_key);
 }
 
 # publish

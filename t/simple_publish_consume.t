@@ -22,10 +22,9 @@ publish $mq, {
     options => { content_type => 'text/plain' }
 };
 
-consume $mq;
-
 my $rv = {};
-$rv = $mq->recv();
+$rv = consume $mq;
+
 ok($rv);
 $mq->disconnect;
 
