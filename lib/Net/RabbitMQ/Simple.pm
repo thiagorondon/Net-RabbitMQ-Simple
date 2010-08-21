@@ -1,4 +1,3 @@
-
 package Net::RabbitMQ::Simple;
 our $VERSION = "0.0002";
 
@@ -11,6 +10,76 @@ extends 'Devel::Declare::Context::Simple';
 
 use aliased 'Net::RabbitMQ::Simple::Wrapper';
 
+=head1 NAME
+
+Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
+
+=head1 VERSION
+
+This document describes NET::RabbitMQ::Simple version 0.0002
+
+=head1 SYNOPSIS
+
+
+    use Net::RabbitMQ::Simple;
+
+    my $mq = mqconnect {
+        hostname => 'localhost',
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
+    };
+
+    exchange $mq, {
+        name => 'mtest_x',
+        type => 'direct',
+        passive => 0,
+        durable => 1,
+        auto_delete => 0,
+        exclusive => 0
+    };
+
+    publish $mq, {
+        exchange => 'maketest',
+        queue => 'mtest',
+        route => 'mtest_route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
+
+    consume $mq;
+    my $rv = $mq->recv();
+    
+    # use Data::Dumper;
+    # print Dumper($rv);
+
+    mqdisconnect $mq;
+
+=head1 DESCRIPTION
+
+This package implements a simple syntax on top of L<Net::RabbitMQ>. With the
+help of this package it is possible to write simple AMQP applications with a
+few lines of perl code.
+
+=head1 METHODS
+
+=cut
+
+=head2 mqconnect
+
+Connect to AMQP server using librabbitmq.
+
+    my $mq = mqconnect ({
+        user => 'guest'
+        password => 'guest',
+        vhost => '/',
+        channel_max => 0,
+        frame_max => 131072,
+        heartbeat => 0
+    });
+
+=cut
+
 sub mqconnect (@_) {
     my $mq = Wrapper->new(@_);
     $mq->connect;
@@ -18,23 +87,50 @@ sub mqconnect (@_) {
     return $mq;
 }
 
+=head2 exchange
+
+Declare an exchange for work.
+
+    exchange $mq, {
+        name => 'name_of_exchange',
+        exchange_type => 'direct',
+        passive => 0,
+        durable => 0,
+        auto_delete => 1
+    };
+
+=cut
+
 sub exchange (@_) {
     my ($mq, $opt) = @_;
     
-    my $exchange = $opt->{exchange};
+    my $exchange = $opt->{name};
     Carp::confess("please give the exchange name") if !$exchange;
-    delete $opt->{exchange};
+    delete $opt->{name};
 
     $mq->exchange_declare($exchange, %{$opt});
 }
 
+=head2 exchange_delete
+
+Delete an exchange if is possible.
+
+    exchange_delete $mq, {
+        name => 'name_of_exchange',
+        if_unused => 1,
+        nowait => 0
+    };
+
+=cut
+
 sub exchange_delete (@_) {
     my ($mq, $opt) = @_;
     
-    my $exchange = $opt->{exchange};
+    my $exchange = $opt->{name};
     Carp::confess("please give the exchange name") if !$exchange;
+    delete $opt->{name};
 
-    $mq->exchange_delete($exchange, %{$opt->{options}});
+    $mq->exchange_delete($exchange, %{$opt});
 }
 
 
@@ -115,59 +211,6 @@ sub parser {
 }
 
 1;
-
-__END__
-
-=head1 NAME
-
-Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
-
-=head1 VERSION
-
-This document describes NET::RabbitMQ::Simple version 0.0002
-
-=head1 SYNOPSIS
-
-
-    use Net::RabbitMQ::Simple;
-
-    my $mq = mqconnect {
-        hostname => 'localhost',
-        user => 'guest',
-        password => 'guest',
-        vhost => '/'
-    };
-
-    exchange $mq, {
-        exchange => 'mtest_x',
-        type => 'direct',
-        passive => 0,
-        durable => 1,
-        auto_delete => 0,
-        exclusive => 0
-    };
-
-    publish $mq, {
-        exchange => 'maketest',
-        queue => 'mtest',
-        route => 'mtest_route',
-        message => 'message',
-        options => { content_type => 'text/plain' }
-    };
-
-    consume $mq;
-    my $rv = $mq->recv();
-    
-    # use Data::Dumper;
-    # print Dumper($rv);
-
-    mqdisconnect $mq;
-
-=head1 DESCRIPTION
-
-This package implements a simple syntax on top of L<Net::RabbitMQ>. With the
-help of this package it is possible to write simple AMQP applications with a
-few lines of perl code.
 
 =head1 SUPPORT
 

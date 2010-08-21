@@ -15,7 +15,7 @@ my $mq = mqconnect {
 };
 
 exchange $mq, {
-    exchange => 'mtest_x',
+    name => 'mtest_x',
     type => 'direct',
     passive => 0,
     durable => 1,
