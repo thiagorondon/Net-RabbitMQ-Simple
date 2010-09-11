@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 use strict;
 
 use Net::RabbitMQ::Simple;
@@ -50,6 +50,11 @@ my $rv = {};
 $rv = consume $mq;
 
 ok($rv);
+
+$rv = get $mq;
+
+is($rv, undef);
+
 $mq->disconnect;
 
 1;
