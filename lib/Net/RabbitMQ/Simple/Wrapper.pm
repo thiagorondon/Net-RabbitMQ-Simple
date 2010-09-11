@@ -159,6 +159,18 @@ method exchange_delete ($exchange, %props) {
 #    $self->conn->exchange_delete($self->channel, $exchange, { %props });
 }
 
+method tx () {
+    $self->conn->tx_select($self->channel);
+}
+
+method rollback() {
+    $self->conn->tx_rollback($self->channel);
+}
+
+method commit() {
+    $self->conn->tx_commit($self->channel);
+}
+
 for my $item (qw/recv disconnect/) {
     method "$item" () {
         $self->conn->$item();

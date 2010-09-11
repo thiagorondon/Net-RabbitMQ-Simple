@@ -132,7 +132,19 @@ sub exchange_delete (@_) {
 
     $mq->exchange_delete($exchange, %{$opt});
 }
+=head2 exchange_publish
 
+Publish a new message.
+
+    publish $mq, {
+        exchange => 'exchange',
+        queue => 'queue',
+        route => 'route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
+
+=cut
 
 sub publish (@_) {
     my ($mq, $opt) = @_;
@@ -151,6 +163,16 @@ sub publish (@_) {
     $mq->publish($opt->{message}, %{$opt->{options}});
 }
 
+=head2 consume
+
+Consume messages from queue.
+
+    consume $mq, {
+        queue => 'name'
+    };
+
+=cut
+
 sub consume (@_) {
     my ($mq, $opt) = @_;
    
@@ -163,6 +185,16 @@ sub consume (@_) {
     $mq->recv();
 }
 
+=head2 get
+
+Consume messages from queue, but return undef if doesn't have message.
+
+    get $mq, {
+        queue => 'name'
+    };
+
+=cut
+
 sub get (@_) {
     my ($mq, $opt) = @_;
    
@@ -174,6 +206,9 @@ sub get (@_) {
     $mq->get($opt->{options} || ());
 }
 
+sub tx (@_) { shift->tx(); }
+sub commit (@_) { shift->commit(); }
+sub rollback (@_) { shift->rollback(); }
 
 sub purge (@_) { shift->purge(@_) }
 sub ack (@_) { shift->ack(@_) }
@@ -185,7 +220,8 @@ sub import {
     my $ctx = __PACKAGE__->new;
 
     my @cmds = ( 'mqconnect', 'publish', 'consume', 'purge', 'ack',
-        'mqdisconnect', 'exchange', 'get', 'exchange_delete');
+        'mqdisconnect', 'exchange', 'get', 'exchange_delete',
+        'tx', 'commit', 'rollback');
 
     Devel::Declare->setup_for(
         $caller, {
