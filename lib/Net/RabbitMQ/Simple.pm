@@ -175,11 +175,9 @@ Consume messages from queue.
 
 sub consume (@_) {
     my ($mq, $opt) = @_;
-   
+    $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
     $mq->exchange_name($opt->{exchange}) if defined($opt->{exchange});
     $mq->queue_declare($opt->{queue}) if defined($opt->{queue});
-    
-    $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
 
     $mq->consume($opt->{options} || ());
     $mq->recv();
@@ -190,20 +188,19 @@ sub consume (@_) {
 Consume messages from queue, but return undef if doesn't have message.
 
     get $mq, {
-        queue => 'name'
+        queue => 'queue',
+        options => { routing_key => 'foo' }
     };
 
 =cut
 
 sub get (@_) {
     my ($mq, $opt) = @_;
-   
+    $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
     $mq->exchange_name($opt->{exchange}) if defined($opt->{exchange});
     $mq->queue_declare($opt->{queue}) if defined($opt->{queue});
-    
-    $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
 
-    $mq->get($opt->{options} || ());
+    $mq->get($opt->{options} ? %{$opt->{options}} : ());
 }
 
 sub tx (@_) { shift->tx(); }
