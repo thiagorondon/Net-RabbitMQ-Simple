@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 use strict;
 
 use Net::RabbitMQ::Simple;
@@ -22,7 +22,7 @@ exchange $mq, {
     auto_delete => 0,
     exclusive => 0
 };
-
+is($mq->exchange_type, 'direct');
 ok($mq->exchange_name);
 
 1;
