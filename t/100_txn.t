@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 use strict;
 
 use Net::RabbitMQ::Simple;
@@ -27,9 +27,9 @@ tx $mq;
 ok($mq->exchange_name);
 
 publish $mq, {
-    exchange => 'mtest_x',
-    queue => 'mtest',
-    route => 'mtest_route',
+    exchange => 'mtest_y',
+    queue => 'mtesty',
+    route => 'mtest_y_route',
     message => 'message',
     options => { content_type => 'text/plain' }
 };
@@ -37,9 +37,9 @@ publish $mq, {
 rollback $mq;
 
 publish $mq, {
-    exchange => 'mtest_x',
-    queue => 'mtest',
-    route => 'mtest_route',
+    exchange => 'mtest_y',
+    queue => 'mtesty',
+    route => 'mtest_y_route',
     message => 'message',
     options => { content_type => 'text/plain' }
 };
@@ -54,6 +54,14 @@ ok($rv);
 $rv = get $mq;
 
 is($rv, undef);
+
+eval {
+    exchange_delete $mq, {
+        name => 'mtest_y',
+        options => { if_unused => 0, nowait => 0 }
+    };
+};
+is($@, '', 'exchange_delete');
 
 $mq->disconnect;
 
