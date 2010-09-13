@@ -80,7 +80,7 @@ Connect to AMQP server using librabbitmq.
 
 =cut
 
-sub mqconnect (@_) {
+sub mqconnect (@) {
     my $mq = Wrapper->new(@_);
     $mq->connect;
     $mq->channel(1); #TODO
@@ -101,7 +101,7 @@ Declare an exchange for work.
 
 =cut
 
-sub exchange (@_) {
+sub exchange (@) {
     my ($mq, $opt) = @_;
     
     my $exchange = $opt->{name};
@@ -123,7 +123,7 @@ Delete an exchange if is possible.
 
 =cut
 
-sub exchange_delete (@_) {
+sub exchange_delete (@) {
     my ($mq, $opt) = @_;
     
     my $exchange = $opt->{name};
@@ -146,7 +146,7 @@ Publish a new message.
 
 =cut
 
-sub publish (@_) {
+sub publish (@) {
     my ($mq, $opt) = @_;
    
     $mq->exchange_name($opt->{exchange}) if $opt->{exchange};
@@ -173,7 +173,7 @@ Consume messages from queue.
 
 =cut
 
-sub consume (@_) {
+sub consume (@) {
     my ($mq, $opt) = @_;
     $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
     $mq->exchange_name($opt->{exchange}) if defined($opt->{exchange});
@@ -194,7 +194,7 @@ Consume messages from queue, but return undef if doesn't have message.
 
 =cut
 
-sub get (@_) {
+sub get (@) {
     my ($mq, $opt) = @_;
     $mq->no_ack(0) if defined($opt->{ack}) and $opt->{ack} == 1;
     $mq->exchange_name($opt->{exchange}) if defined($opt->{exchange});
@@ -203,13 +203,13 @@ sub get (@_) {
     $mq->get($opt->{options} ? %{$opt->{options}} : ());
 }
 
-sub tx (@_) { shift->tx(); }
-sub commit (@_) { shift->commit(); }
-sub rollback (@_) { shift->rollback(); }
+sub tx (@) { shift->tx(); }
+sub commit (@) { shift->commit(); }
+sub rollback (@) { shift->rollback(); }
 
-sub purge (@_) { shift->purge(@_) }
-sub ack (@_) { shift->ack(@_) }
-sub mqdisconnect(@_) { shift->disconnect(@_) }
+sub purge (@) { shift->purge(@_) }
+sub ack (@) { shift->ack(@_) }
+sub mqdisconnect(@) { shift->disconnect(@_) }
 
 sub import {
     my $class = shift;
