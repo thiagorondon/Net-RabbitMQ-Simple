@@ -12,6 +12,9 @@ WriteMakefile(
         'Moose' => 1.05,
         'MooseX::LazyRequire' => 0.06,
         'namespace::autoclean' => 0.11,
+        'Devel::Declare' => 0.00600,
+        'Net::RabbitMQ' => 0.1.6,
+        'MooseX::Method::Signatures' => 0.36,
     },
     LICENSE => 'perl'
 );
