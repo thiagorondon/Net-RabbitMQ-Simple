@@ -16,7 +16,7 @@ Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
 
 =head1 VERSION
 
-This document describes NET::RabbitMQ::Simple version 0.0002
+This document describes NET::RabbitMQ::Simple version 0.0003.
 
 =head1 SYNOPSIS
 
