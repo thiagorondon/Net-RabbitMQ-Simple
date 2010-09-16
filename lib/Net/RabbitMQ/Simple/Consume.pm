@@ -3,6 +3,7 @@ package Net::RabbitMQ::Simple::Consume;
 use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Method::Signatures;
+use namespace::autoclean;
 
 # consume and get.
 has 'consumer_tag' => (is => 'rw', isa => 'Str', default => 'absent');
@@ -20,6 +21,8 @@ for my $item (qw/consume get/) {
 }
 
 method recv () { $self->conn->recv() }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

@@ -3,6 +3,7 @@ package Net::RabbitMQ::Simple::Publish;
 use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Method::Signatures;
+use namespace::autoclean;
 
 has 'body' => (
     is => 'rw', 
@@ -36,6 +37,6 @@ method publish ($body, %props) {
 
 }
 
-
+__PACKAGE__->meta->make_immutable;
 1;
 

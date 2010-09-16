@@ -4,6 +4,7 @@ use Moose;
 
 use Moose::Util::TypeConstraints;
 use MooseX::Method::Signatures;
+use namespace::autoclean;
 
 # queue
 has 'queue_name' => (
@@ -38,6 +39,8 @@ method queue_unbind (Str $routing_key = '#') {
     $self->conn->queue_unbind($self->channel, $self->queue_name,
                 $self->exchange_name, $routing_key);
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

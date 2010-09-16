@@ -3,6 +3,7 @@ package Net::RabbitMQ::Simple::Exchange;
 use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Method::Signatures;
+use namespace::autoclean;
 
 enum 'Exchange' => qw/direct topic fanout headers/;
 
@@ -35,6 +36,8 @@ method exchange_declare (Str $exchange_name, %props) {
 method exchange_delete ($exchange, %props) {
 #    $self->conn->exchange_delete($self->channel, $exchange, { %props });
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
