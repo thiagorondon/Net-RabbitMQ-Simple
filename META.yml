@@ -1,0 +1,18 @@
+--- #YAML:1.0
+name:               Net-RabbitMQ-Simple
+version:            0.0003
+abstract:           Simple way for RabbitMQ lib
+author:  []
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Devel::Declare:       0.006
+    ExtUtils::Install:    1.46
+    ExtUtils::MakeMaker:  6.31
+    Module::Build:        0.36
+    Moose:                1.05
+    MooseX::LazyRequire:  0.06
+    MooseX::Method::Signatures:  0.36
+    namespace::autoclean:  0.11
