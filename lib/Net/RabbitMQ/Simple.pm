@@ -1,5 +1,5 @@
 package Net::RabbitMQ::Simple;
-our $VERSION = "0.0002";
+our $VERSION = "0.0003";
 
 use Moose;
 use 5.008001;
@@ -23,7 +23,7 @@ This document describes NET::RabbitMQ::Simple version 0.0002
 
     use Net::RabbitMQ::Simple;
 
-    my $mq = mqconnect {
+    mqconnect {
         hostname => 'localhost',
         user => 'guest',
         password => 'guest',

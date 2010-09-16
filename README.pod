@@ -1,3 +1,6 @@
+
+=pod
+
 =head1 NAME
 
 Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
@@ -11,7 +14,7 @@ This document describes NET::RabbitMQ::Simple version 0.0002
 
     use Net::RabbitMQ::Simple;
 
-    my $mq = mqconnect {
+    $mqconnect {
         hostname => 'localhost',
         user => 'guest',
         password => 'guest',
