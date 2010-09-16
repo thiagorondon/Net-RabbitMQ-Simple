@@ -14,7 +14,7 @@ my $mq = mqconnect {
     vhost => '/'
 };
 
-publish $mq, {
+publish {
     exchange => 'mtest_x',
     queue => 'mtest',
     route => 'mtest_route',
@@ -22,10 +22,10 @@ publish $mq, {
     options => { content_type => 'text/plain' }
 };
 
-my $getr = get $mq;
+my $getr = get;
 ok($getr);
 
-$getr = get $mq;
+$getr = get;
 is($getr, undef, 'get should return empty');
 
 1;

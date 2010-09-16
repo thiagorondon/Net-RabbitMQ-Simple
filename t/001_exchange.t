@@ -14,7 +14,7 @@ my $mq = mqconnect {
     vhost => '/'
 };
 
-exchange $mq, {
+exchange {
     name => 'mtest_x',
     type => 'direct',
     passive => 0,

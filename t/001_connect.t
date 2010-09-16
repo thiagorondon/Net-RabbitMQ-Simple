@@ -16,7 +16,7 @@ my $mq = mqconnect {
 
 is(ref $mq, 'Net::RabbitMQ::Simple::Wrapper');
 
-mqdisconnect $mq;
+#mqdisconnect;
 
 1;
 

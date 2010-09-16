@@ -14,7 +14,7 @@ my $mq = mqconnect {
     vhost => '/'
 };
 
-publish $mq, {
+publish {
     exchange => 'mtest_x',
     queue => 'mtest',
     route => 'mtest_route',
@@ -23,10 +23,10 @@ publish $mq, {
 };
 
 my $rv = {};
-$rv = consume $mq;
+$rv = consume;
 
 ok($rv);
-$mq->disconnect;
+mqdisconnect;
 
 1;
 

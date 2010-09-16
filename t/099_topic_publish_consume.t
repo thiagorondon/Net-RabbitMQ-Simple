@@ -14,7 +14,7 @@ my $mq = mqconnect {
     vhost => '/'
 };
 
-exchange $mq, {
+exchange {
     name => 'ex_topic',
     type => 'topic',
     passive => 0,
@@ -25,7 +25,7 @@ exchange $mq, {
 
 ok($mq->exchange_name);
 
-publish $mq, {
+publish {
     exchange => 'ex_topic',
     queue => 'foo.bar',
     route => 'foo.bar',
@@ -35,13 +35,13 @@ publish $mq, {
 
 my $rv = {};
 
-$rv = get $mq, { options => { 
+$rv = get { options => { 
         exchange => 'ex_topic',
         routing_key => 'foo.*' } 
 };
 ok($rv);
 
-publish $mq, {
+publish {
     exchange => 'ex_topic',
     queue => 'foo.baz',
     route => 'foo.baz',
@@ -51,7 +51,7 @@ publish $mq, {
         content_type => 'text/plain' }
 };
 
-$rv = get $mq, { options => { routing_key => '#.baz' } } ;
+$rv = get { options => { routing_key => '#.baz' } } ;
 
 ok($rv);
 

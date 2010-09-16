@@ -15,7 +15,7 @@ my $mq = mqconnect {
 };
 
 eval { 
-    exchange_delete $mq, { 
+    exchange_delete { 
         name => 'mtest_x',
         options => { if_unused => 0, nowait => 0 }
     };

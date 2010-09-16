@@ -14,7 +14,7 @@ my $mq = mqconnect {
     vhost => '/'
 };
 
-exchange $mq, {
+exchange {
     name => 'mtest_y',
     passive => 0,
     durable => 1,
@@ -22,11 +22,11 @@ exchange $mq, {
     exclusive => 0
 };
 
-tx $mq;
+tx;
 
 ok($mq->exchange_name);
 
-publish $mq, {
+publish {
     exchange => 'mtest_y',
     queue => 'mtesty',
     route => 'mtest_y_route',
@@ -34,9 +34,9 @@ publish $mq, {
     options => { content_type => 'text/plain' }
 };
 
-rollback $mq;
+rollback ;
 
-publish $mq, {
+publish {
     exchange => 'mtest_y',
     queue => 'mtesty',
     route => 'mtest_y_route',
@@ -44,26 +44,26 @@ publish $mq, {
     options => { content_type => 'text/plain' }
 };
 
-commit $mq;
+commit;
 
 my $rv = {};
-$rv = consume $mq;
+$rv = consume; 
 
 ok($rv);
 
-$rv = get $mq;
+$rv = get;
 
 is($rv, undef);
 
 eval {
-    exchange_delete $mq, {
+    exchange_delete {
         name => 'mtest_y',
         options => { if_unused => 0, nowait => 0 }
     };
 };
 is($@, '', 'exchange_delete');
 
-$mq->disconnect;
+mqdisconnect;
 
 1;
 

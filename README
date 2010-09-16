@@ -1,73 +1,178 @@
-NAME
-    Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
+=head1 NAME
 
-VERSION
-    This document describes NET::RabbitMQ::Simple version 0.0002
+Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
 
-SYNOPSIS
-        use Net::RabbitMQ::Simple;
+=head1 VERSION
 
-        my $mq = mqconnect {
-            hostname => 'localhost',
-            user => 'guest',
-            password => 'guest',
-            vhost => '/'
-        };
+This document describes NET::RabbitMQ::Simple version 0.0002
 
-        exchange $mq, {
-            exchange => 'mtest_x',
-            type => 'direct',
-            passive => 0,
-            durable => 1,
-            auto_delete => 0,
-            exclusive => 0
-        };
+=head1 SYNOPSIS
 
-        publish $mq, {
-            exchange => 'maketest',
-            queue => 'mtest',
-            route => 'mtest_route',
-            message => 'message',
-            options => { content_type => 'text/plain' }
-        };
 
-        consume $mq;
-        my $rv = $mq->recv();
-        
+    use Net::RabbitMQ::Simple;
+
+    my $mq = mqconnect {
+        hostname => 'localhost',
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
+    };
+
+    exchange {
+        name => 'mtest_x',
+        type => 'direct',
+        passive => 0,
+        durable => 1,
+        auto_delete => 0,
+        exclusive => 0
+    };
+
+    publish {
+        exchange => 'maketest',
+        queue => 'mtest',
+        route => 'mtest_route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
+
+    my $rv = consume;
+
+    # or
+    # my $rv = get { options => { routing_key => 'foo.*' }}
+
     # use Data::Dumper;
-        # print Dumper($rv);
+    # print Dumper($rv);
 
-        mqdisconnect $mq;
+    mqdisconnect;
 
-DESCRIPTION
-    This package implements a simple syntax on top of Net::RabbitMQ. With
-    the help of this package it is possible to write simple AMQP
-    applications with a few lines of perl code.
+=head1 DESCRIPTION
 
-SUPPORT
-    *   RT: CPAN's request tracker
+This package implements a simple syntax on top of L<Net::RabbitMQ>. With the
+help of this package it is possible to write simple AMQP applications with a
+few lines of perl code.
 
-        <http://rt.cpan.org/tbr/Bugs.html?Dist=Net-RabbitMQ-Simple>
+=head1 METHODS
 
-    *   AnnoCPAN: Annotated CPAN documentation
 
-        <http://annocpan.org/dist/Net-RabbitMQ-Simple>
+=cut
 
-    *   CPAN Ratings
+=head2 mqconnect
 
-        <http://cpanratings.perl.org/d/Net-RabbitMQ-Simple>
+Connect to AMQP server using librabbitmq.
 
-    *   Search CPAN
+    my $mq = mqconnect ({
+        user => 'guest'
+        password => 'guest',
+        vhost => '/',
+        channel_max => 0,
+        frame_max => 131072,
+        heartbeat => 0
+    });
 
-        <http://search.cpan.org/dist/Net-RabbitMQ-Simple>
 
-SEE ALSO
-    Net::RabbitMQ, Devel::Declare
+=cut
 
-AUTHOR
-    Thiago Rondon. <thiago@aware.com.br>
+=head2 exchange
 
-LICENSE AND COPYRIGHT
-    This module is free software; you can redistribute it and/or modify it
-    under the same terms as Perl itself. See perlartistic.
+Declare an exchange for work.
+
+    exchange {
+        name => 'name_of_exchange',
+        exchange_type => 'direct',
+        passive => 0,
+        durable => 0,
+        auto_delete => 1
+    };
+
+
+=cut
+
+=head2 exchange_delete
+
+Delete an exchange if is possible.
+
+    exchange_delete {
+        name => 'name_of_exchange',
+        if_unused => 1,
+        nowait => 0
+    };
+
+
+=cut
+
+=head2 exchange_publish
+
+Publish a new message.
+
+    publish {
+        exchange => 'exchange',
+        queue => 'queue',
+        route => 'route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
+
+
+=cut
+
+=head2 consume
+
+Consume messages from queue.
+
+    consume {
+        queue => 'name'
+    };
+
+
+=cut
+
+=head2 get
+
+Consume messages from queue, but return undef if doesn't have message.
+
+    get {
+        queue => 'queue',
+        options => { routing_key => 'foo' }
+    };
+
+
+=cut
+
+=head1 SUPPORT
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/tbr/Bugs.html?Dist=Net-RabbitMQ-Simple>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Net-RabbitMQ-Simple>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Net-RabbitMQ-Simple>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Net-RabbitMQ-Simple>
+
+=back
+
+=head1 SEE ALSO
+
+L<Net::RabbitMQ>, L<Devel::Declare>
+
+=head1 AUTHOR
+
+Thiago Rondon. <thiago@aware.com.br>
+
+=head1 LICENSE AND COPYRIGHT
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself. See L<perlartistic>.
+
+
+=cut
 

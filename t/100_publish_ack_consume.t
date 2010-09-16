@@ -14,7 +14,7 @@ my $mq = mqconnect {
     vhost => '/'
 };
 
-publish $mq, {
+publish {
     exchange => 'mtest_x',
     queue => 'mtest_ack',
     queue_options => { passive => 0, durable => 1, exclusive => 0, auto_delete => 0 },
@@ -25,16 +25,16 @@ publish $mq, {
 };
 
 my $rv = {};
-$rv = consume $mq, { ack => 1 };
+$rv = consume { ack => 1 };
 
 $rv->{delivery_tag} = 10;
-$mq->disconnect;
+mqdisconnect;
 
 $mq = mqconnect {
     hostname => $host,
 };
 
-$rv = consume $mq, {
+$rv = consume {
     exchange => 'mtest_x',
     ack => 1,
     queue => 'mtest_ack'
@@ -42,10 +42,10 @@ $rv = consume $mq, {
 
 my $acktag = $rv->{delivery_tag};
 $rv->{delivery_tag} = 10;
-ack $mq, $acktag;
+ack $acktag;
 ok($rv);
 
-$mq->disconnect();
+mqdisconnect;
 
 1;
 
