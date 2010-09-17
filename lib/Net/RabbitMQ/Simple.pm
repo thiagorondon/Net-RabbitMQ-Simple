@@ -1,5 +1,5 @@
 package Net::RabbitMQ::Simple;
-our $VERSION = "0.0003";
+our $VERSION = "0.0004";
 
 use Moose;
 use 5.008001;
@@ -13,10 +13,6 @@ use aliased 'Net::RabbitMQ::Simple::Wrapper';
 =head1 NAME
 
 Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
-
-=head1 VERSION
-
-This document describes NET::RabbitMQ::Simple version 0.0003.
 
 =head1 SYNOPSIS
 
@@ -67,18 +63,20 @@ few lines of perl code.
 
 =cut
 
-=head2 mqconnect
+=head2 mqconnect %hash
 
 Connect to AMQP server using librabbitmq.
 
-    my $mq = mqconnect ({
+Return L<Net::RabbitMQ> object.
+
+    {
         user => 'guest'
         password => 'guest',
         vhost => '/',
         channel_max => 0,
         frame_max => 131072,
         heartbeat => 0
-    });
+    }
 
 =cut
 
@@ -91,17 +89,17 @@ sub mqconnect (@) {
     return $_mq;
 }
 
-=head2 exchange
+=head2 exchange %hash
 
 Declare an exchange for work.
 
-    exchange {
+    {
         name => 'name_of_exchange',
         exchange_type => 'direct',
         passive => 0,
         durable => 0,
         auto_delete => 1
-    };
+    }
 
 =cut
 
@@ -114,7 +112,7 @@ sub exchange (@) {
     $_mq->exchange_declare($exchange, %{$opt});
 }
 
-=head2 exchange_delete
+=head2 exchange_delete %hash
 
 Delete an exchange if is possible.
 
@@ -122,7 +120,7 @@ Delete an exchange if is possible.
         name => 'name_of_exchange',
         if_unused => 1,
         nowait => 0
-    };
+    }
 
 =cut
 
@@ -135,17 +133,17 @@ sub exchange_delete (@) {
 
     $_mq->exchange_delete($exchange, %{$opt});
 }
-=head2 exchange_publish
+=head2 exchange_publish %hash
 
 Publish a new message.
 
-    publish {
+    {
         exchange => 'exchange',
         queue => 'queue',
         route => 'route',
         message => 'message',
         options => { content_type => 'text/plain' }
-    };
+    }
 
 =cut
 
@@ -167,13 +165,13 @@ sub publish (@) {
     $_mq->publish($opt->{message}, %{$opt->{options}});
 }
 
-=head2 consume
+=head2 consume %hash
 
 Consume messages from queue.
 
-    consume {
+    {
         queue => 'name'
-    };
+    }
 
 =cut
 
@@ -187,14 +185,13 @@ sub consume (@) {
     $_mq->recv();
 }
 
-=head2 get
-
+=head2 get %hash
 Consume messages from queue, but return undef if doesn't have message.
 
-    get {
+    {
         queue => 'queue',
         options => { routing_key => 'foo' }
-    };
+    }
 
 =cut
 
@@ -207,13 +204,61 @@ sub get (@) {
     $_mq->get($opt->{options} ? %{$opt->{options}} : ());
 }
 
+=head2 tx
+
+Start a server-side transaction over channel.
+
+=cut
+
 sub tx (@) { $_mq->tx(); }
+
+=head2 commit
+
+Commit a server-side transaction over channel.
+
+=cut
+
 sub commit (@) { $_mq->commit(); }
+
+=head2 rollback
+
+Rollback a server-side transaction over channel.
+
+=cut
+
 sub rollback (@) { $_mq->rollback(); }
 
+=head2 purge
+
+Purge queue.
+
+=cut
+
 sub purge (@) { $_mq->purge(@_) }
+
+=head2 ack 
+
+Need acknowledged.
+
+=cut
+
 sub ack (@) { $_mq->ack(@_) }
+
+=head2 mqdisconnect
+
+Disconnect from server.
+
+=cut
+
 sub mqdisconnect(@) { $_mq->disconnect(@_) }
+
+=head2 mqobject $object
+
+Set current L<Net::RabbitMQ> object.
+
+=cut
+
+sub mqobject(@) { $_mq = shift or return; }
 
 sub import {
     my $class = shift;

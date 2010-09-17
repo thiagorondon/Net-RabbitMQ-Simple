@@ -1,20 +1,13 @@
-
-=pod
-
 =head1 NAME
 
 Net::RabbitMQ::Simple - A simple syntax for Net::RabbitMQ
-
-=head1 VERSION
-
-This document describes NET::RabbitMQ::Simple version 0.0002
 
 =head1 SYNOPSIS
 
 
     use Net::RabbitMQ::Simple;
 
-    $mqconnect {
+    mqconnect {
         hostname => 'localhost',
         user => 'guest',
         password => 'guest',
@@ -59,38 +52,40 @@ few lines of perl code.
 
 =cut
 
-=head2 mqconnect
+=head2 mqconnect %hash
 
 Connect to AMQP server using librabbitmq.
 
-    my $mq = mqconnect ({
+Return L<Net::RabbitMQ> object.
+
+    {
         user => 'guest'
         password => 'guest',
         vhost => '/',
         channel_max => 0,
         frame_max => 131072,
         heartbeat => 0
-    });
+    }
 
 
 =cut
 
-=head2 exchange
+=head2 exchange %hash
 
 Declare an exchange for work.
 
-    exchange {
+    {
         name => 'name_of_exchange',
         exchange_type => 'direct',
         passive => 0,
         durable => 0,
         auto_delete => 1
-    };
+    }
 
 
 =cut
 
-=head2 exchange_delete
+=head2 exchange_delete %hash
 
 Delete an exchange if is possible.
 
@@ -98,45 +93,93 @@ Delete an exchange if is possible.
         name => 'name_of_exchange',
         if_unused => 1,
         nowait => 0
-    };
+    }
 
 
 =cut
 
-=head2 exchange_publish
+=head2 exchange_publish %hash
 
 Publish a new message.
 
-    publish {
+    {
         exchange => 'exchange',
         queue => 'queue',
         route => 'route',
         message => 'message',
         options => { content_type => 'text/plain' }
-    };
+    }
 
 
 =cut
 
-=head2 consume
+=head2 consume %hash
 
 Consume messages from queue.
 
-    consume {
+    {
         queue => 'name'
-    };
+    }
 
 
 =cut
 
-=head2 get
-
+=head2 get %hash
 Consume messages from queue, but return undef if doesn't have message.
 
-    get {
+    {
         queue => 'queue',
         options => { routing_key => 'foo' }
-    };
+    }
+
+
+=cut
+
+=head2 tx
+
+Start a server-side transaction over channel.
+
+
+=cut
+
+=head2 commit
+
+Commit a server-side transaction over channel.
+
+
+=cut
+
+=head2 rollback
+
+Rollback a server-side transaction over channel.
+
+
+=cut
+
+=head2 purge
+
+Purge queue.
+
+
+=cut
+
+=head2 ack 
+
+Need acknowledged.
+
+
+=cut
+
+=head2 mqdisconnect
+
+Disconnect from server.
+
+
+=cut
+
+=head2 mqobject $object
+
+Set current L<Net::RabbitMQ> object.
 
 
 =cut
