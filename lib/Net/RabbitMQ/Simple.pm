@@ -1,5 +1,5 @@
 package Net::RabbitMQ::Simple;
-our $VERSION = "0.0004";
+our $VERSION = "0.0005";
 
 use Moose;
 use 5.008001;
@@ -61,13 +61,15 @@ few lines of perl code.
 
 =head1 METHODS
 
+All methods, unless specifically stated, return nothing on success and die on failure.
+
 =cut
 
 =head2 mqconnect %hash
 
 Connect to AMQP server using librabbitmq.
 
-Return L<Net::RabbitMQ> object.
+This method returns the L<Net::RabbitMQ> object.
 
     {
         user => 'guest'
@@ -303,6 +305,12 @@ sub parser {
 }
 
 1;
+
+=head1 TEST
+
+Its necessary to set MQHOST environment variable for run all tests. For example:
+
+    MQHOST=localhost make test
 
 =head1 SUPPORT
 
