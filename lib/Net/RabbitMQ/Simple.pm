@@ -186,6 +186,7 @@ sub consume (@) {
 }
 
 =head2 get %hash
+
 Consume messages from queue, but return undef if doesn't have message.
 
     {
