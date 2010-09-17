@@ -5,25 +5,31 @@ use strict;
 
 use Net::RabbitMQ::Simple;
 
-my $host = $ENV{'MQHOST'} || "dev.rabbitmq.com";
+my $host = $ENV{'MQHOST'};
 
-my $mq = mqconnect {
-    hostname => $host,
-    user => 'guest',
-    password => 'guest',
-    vhost => '/'
-};
+SKIP: {
+    skip 'No $ENV{\'MQHOST\'}\n', 2 unless $host;
 
-exchange {
-    name => 'mtest_x',
-    type => 'direct',
-    passive => 0,
-    durable => 1,
-    auto_delete => 0,
-    exclusive => 0
-};
-is($mq->exchange_type, 'direct');
-ok($mq->exchange_name);
+    my $mq = mqconnect {
+        hostname => $host,
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
+    };
+
+    exchange {
+        name => 'mtest_x',
+        type => 'direct',
+        passive => 0,
+        durable => 1,
+        auto_delete => 0,
+        exclusive => 0
+    };
+    
+    is($mq->exchange_type, 'direct');
+    ok($mq->exchange_name);
+}
+
 
 1;
 

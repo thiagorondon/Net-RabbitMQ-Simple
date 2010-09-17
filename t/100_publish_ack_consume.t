@@ -5,47 +5,51 @@ use strict;
 
 use Net::RabbitMQ::Simple;
 
-my $host = $ENV{'MQHOST'} || "dev.rabbitmq.com";
+my $host = $ENV{'MQHOST'};
 
-my $mq = mqconnect {
-    hostname => $host,
-    user => 'guest',
-    password => 'guest',
-    vhost => '/'
-};
+SKIP: {
+    skip 'No $ENV{\'MQHOST\'}\n', 1 unless $host;
 
-publish {
-    exchange => 'mtest_x',
-    queue => 'mtest_ack',
-    queue_options => { passive => 0, durable => 1, exclusive => 0, auto_delete => 0 },
-    route => 'mtest_route',
-    ack => 1,
-    message => 'message2',
-    options => { content_type => 'text/plain' }
-};
+    my $mq = mqconnect {
+        hostname => $host,
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
+    };
 
-my $rv = {};
-$rv = consume { ack => 1 };
+    publish {
+        exchange => 'mtest_x',
+        queue => 'mtest_ack',
+        queue_options => { passive => 0, durable => 1, exclusive => 0, auto_delete => 0 },
+        route => 'mtest_route',
+        ack => 1,
+        message => 'message2',
+        options => { content_type => 'text/plain' }
+    };
 
-$rv->{delivery_tag} = 10;
-mqdisconnect;
+    my $rv = {};
+    $rv = consume { ack => 1 };
 
-$mq = mqconnect {
-    hostname => $host,
-};
+    $rv->{delivery_tag} = 10;
+    mqdisconnect;
 
-$rv = consume {
-    exchange => 'mtest_x',
-    ack => 1,
-    queue => 'mtest_ack'
-};
+    $mq = mqconnect {
+        hostname => $host,
+    };
 
-my $acktag = $rv->{delivery_tag};
-$rv->{delivery_tag} = 10;
-ack $acktag;
-ok($rv);
+    $rv = consume {
+        exchange => 'mtest_x',
+        ack => 1,
+        queue => 'mtest_ack'
+    };
 
-mqdisconnect;
+    my $acktag = $rv->{delivery_tag};
+    $rv->{delivery_tag} = 10;
+    ack $acktag;
+    ok($rv);
+
+    mqdisconnect;
+}
 
 1;
 

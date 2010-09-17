@@ -5,22 +5,25 @@ use strict;
 
 use Net::RabbitMQ::Simple;
 
-my $host = $ENV{'MQHOST'} || "dev.rabbitmq.com";
+my $host = $ENV{'MQHOST'};
 
-my $mq = mqconnect {
-    hostname => $host,
-    user => 'guest',
-    password => 'guest',
-    vhost => '/'
-};
-
-eval { 
-    exchange_delete { 
-        name => 'mtest_x',
-        options => { if_unused => 0, nowait => 0 }
+SKIP: {
+    skip 'No $ENV{\'MQHOST\'}\n', 1 unless $host;
+    my $mq = mqconnect {
+        hostname => $host,
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
     };
-};
-is($@, '', 'exchange_delete');
+
+    eval { 
+        exchange_delete { 
+            name => 'mtest_x',
+            options => { if_unused => 0, nowait => 0 }
+        };
+    };
+    is($@, '', 'exchange_delete');
+}
 
 1;
 

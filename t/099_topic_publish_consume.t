@@ -5,55 +5,60 @@ use strict;
 
 use Net::RabbitMQ::Simple;
 
-my $host = $ENV{'MQHOST'} || "dev.rabbitmq.com";
+my $host = $ENV{'MQHOST'};
 
-my $mq = mqconnect {
-    hostname => $host,
-    user => 'guest',
-    password => 'guest',
-    vhost => '/'
-};
+SKIP: {
+    skip 'No $ENV{\'MQHOST\'}\n', 3 unless $host;
 
-exchange {
-    name => 'ex_topic',
-    type => 'topic',
-    passive => 0,
-    durable => 1,
-    auto_delete => 1,
-    exclusive => 0
-};
+    my $mq = mqconnect {
+        hostname => $host,
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
+    };
 
-ok($mq->exchange_name);
+    exchange {
+        name => 'ex_topic',
+        type => 'topic',
+        passive => 0,
+        durable => 1,
+        auto_delete => 1,
+        exclusive => 0
+    };
 
-publish {
-    exchange => 'ex_topic',
-    queue => 'foo.bar',
-    route => 'foo.bar',
-    message => 'message foo.bar',
-    options => { content_type => 'text/plain' }
-};
+    ok($mq->exchange_name);
 
-my $rv = {};
-
-$rv = get { options => { 
+    publish {
         exchange => 'ex_topic',
-        routing_key => 'foo.*' } 
-};
-ok($rv);
+        queue => 'foo.bar',
+        route => 'foo.bar',
+        message => 'message foo.bar',
+        options => { content_type => 'text/plain' }
+    };
 
-publish {
-    exchange => 'ex_topic',
-    queue => 'foo.baz',
-    route => 'foo.baz',
-    message => 'message foo.baz',
-    options => { 
+    my $rv = {};
+
+    $rv = get { options => { 
+            exchange => 'ex_topic',
+            routing_key => 'foo.*' } 
+    };
+    ok($rv);
+
+    publish {
         exchange => 'ex_topic',
-        content_type => 'text/plain' }
-};
+        queue => 'foo.baz',
+        route => 'foo.baz',
+        message => 'message foo.baz',
+        options => { 
+            exchange => 'ex_topic',
+            content_type => 'text/plain' }
+    };
 
-$rv = get { options => { routing_key => '#.baz' } } ;
+    $rv = get { options => { routing_key => '#.baz' } } ;
 
-ok($rv);
+    ok($rv);
+
+}
 
 1;
 

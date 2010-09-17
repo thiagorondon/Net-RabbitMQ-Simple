@@ -5,28 +5,32 @@ use strict;
 
 use Net::RabbitMQ::Simple;
 
-my $host = $ENV{'MQHOST'} || "dev.rabbitmq.com";
+my $host = $ENV{'MQHOST'};
 
-my $mq = mqconnect {
-    hostname => $host,
-    user => 'guest',
-    password => 'guest',
-    vhost => '/'
-};
+SKIP: {
+    skip 'No $ENV{\'MQHOST\'}\n', 1 unless $host;
 
-publish {
-    exchange => 'mtest_x',
-    queue => 'mtest',
-    route => 'mtest_route',
-    message => 'message',
-    options => { content_type => 'text/plain' }
-};
+    my $mq = mqconnect {
+        hostname => $host,
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
+    };
 
-my $rv = {};
-$rv = consume;
+    publish {
+        exchange => 'mtest_x',
+        queue => 'mtest',
+        route => 'mtest_route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
 
-ok($rv);
-mqdisconnect;
+    my $rv = {};
+    $rv = consume;
+
+    ok($rv);
+    mqdisconnect;
+}
 
 1;
 

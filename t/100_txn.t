@@ -5,65 +5,69 @@ use strict;
 
 use Net::RabbitMQ::Simple;
 
-my $host = $ENV{'MQHOST'} || "dev.rabbitmq.com";
+my $host = $ENV{'MQHOST'};
 
-my $mq = mqconnect {
-    hostname => $host,
-    user => 'guest',
-    password => 'guest',
-    vhost => '/'
-};
+SKIP: {
+    skip 'No $ENV{\'MQHOST\'}\n', 4 unless $host;
 
-exchange {
-    name => 'mtest_y',
-    passive => 0,
-    durable => 1,
-    auto_delete => 1,
-    exclusive => 0
-};
-
-tx;
-
-ok($mq->exchange_name);
-
-publish {
-    exchange => 'mtest_y',
-    queue => 'mtesty',
-    route => 'mtest_y_route',
-    message => 'message',
-    options => { content_type => 'text/plain' }
-};
-
-rollback ;
-
-publish {
-    exchange => 'mtest_y',
-    queue => 'mtesty',
-    route => 'mtest_y_route',
-    message => 'message',
-    options => { content_type => 'text/plain' }
-};
-
-commit;
-
-my $rv = {};
-$rv = consume; 
-
-ok($rv);
-
-$rv = get;
-
-is($rv, undef);
-
-eval {
-    exchange_delete {
-        name => 'mtest_y',
-        options => { if_unused => 0, nowait => 0 }
+    my $mq = mqconnect {
+        hostname => $host,
+        user => 'guest',
+        password => 'guest',
+        vhost => '/'
     };
-};
-is($@, '', 'exchange_delete');
 
-mqdisconnect;
+    exchange {
+        name => 'mtest_y',
+        passive => 0,
+        durable => 1,
+        auto_delete => 1,
+        exclusive => 0
+    };
+
+    tx;
+
+    ok($mq->exchange_name);
+
+    publish {
+        exchange => 'mtest_y',
+        queue => 'mtesty',
+        route => 'mtest_y_route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
+
+    rollback ;
+
+    publish {
+        exchange => 'mtest_y',
+        queue => 'mtesty',
+        route => 'mtest_y_route',
+        message => 'message',
+        options => { content_type => 'text/plain' }
+    };
+
+    commit;
+
+    my $rv = {};
+    $rv = consume; 
+
+    ok($rv);
+
+    $rv = get;
+
+    is($rv, undef);
+
+    eval {
+        exchange_delete {
+            name => 'mtest_y',
+            options => { if_unused => 0, nowait => 0 }
+        };
+    };
+    is($@, '', 'exchange_delete');
+
+    mqdisconnect;
+}
 
 1;
 
