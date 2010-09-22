@@ -19,10 +19,13 @@ SKIP: {
     eval { 
         exchange_delete { 
             name => 'mtest_x',
-            options => { if_unused => 0, nowait => 0 }
+            if_unused => 0, 
+            nowait => 0
         };
     };
     is($@, '', 'exchange_delete');
+
+    mqdisconnect;
 }
 
 1;

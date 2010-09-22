@@ -19,10 +19,9 @@ SKIP: {
 
     publish {
         exchange => 'mtest_x',
-        queue => 'mtest',
-        route => 'mtest_route',
-        message => 'message',
-        options => { content_type => 'text/plain' }
+        queue => 'mtest_simple',
+        route => 'mtest_simple_route',
+        message => 'message simple',
     };
 
     my $rv = {};

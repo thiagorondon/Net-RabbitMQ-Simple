@@ -20,8 +20,7 @@ SKIP: {
     publish {
         exchange => 'mtest_x',
         queue => 'mtest_ack',
-        queue_options => { passive => 0, durable => 1, exclusive => 0, auto_delete => 0 },
-        route => 'mtest_route',
+        route => 'mtest_ack_route',
         ack => 1,
         message => 'message2',
         options => { content_type => 'text/plain' }

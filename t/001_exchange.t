@@ -28,6 +28,8 @@ SKIP: {
     
     is($mq->exchange_type, 'direct');
     ok($mq->exchange_name);
+
+    mqdisconnect;
 }
 
 

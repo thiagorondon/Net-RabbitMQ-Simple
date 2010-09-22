@@ -19,9 +19,9 @@ SKIP: {
 
     publish {
         exchange => 'mtest_x',
-        queue => 'mtest',
-        route => 'mtest_route',
-        message => 'message',
+        queue => 'mtest_get',
+        route => 'mtest_get_route',
+        message => 'message get',
         options => { content_type => 'text/plain' }
     };
 
@@ -30,6 +30,8 @@ SKIP: {
 
     $getr = get;
     is($getr, undef, 'get should return empty');
+
+    mqdisconnect;
 }
 
 1;

@@ -61,7 +61,8 @@ SKIP: {
     eval {
         exchange_delete {
             name => 'mtest_y',
-            options => { if_unused => 0, nowait => 0 }
+            if_unused => 0, 
+            nowait => 0
         };
     };
     is($@, '', 'exchange_delete');

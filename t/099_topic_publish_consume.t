@@ -58,6 +58,7 @@ SKIP: {
 
     ok($rv);
 
+    mqdisconnect;
 }
 
 1;
