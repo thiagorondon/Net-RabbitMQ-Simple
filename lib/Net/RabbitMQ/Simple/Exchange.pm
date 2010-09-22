@@ -26,15 +26,18 @@ after exchange_name => sub {
 method exchange_declare (Str $exchange_name, %props) {
     $self->exchange_name($exchange_name);
     
-    $props{type} = $self->exchange_type if !defined($props{type});
-    $self->exchange_type($props{type});
+    $props{type} = $self->exchange_type if !defined($props{type})
+        or $self->exchange_type($props{type});
+
+    $props{exchange_type} = $props{type};
+    delete $props{type};
 
     $self->conn->exchange_declare(
         $self->channel, $self->exchange_name, { %props } );
 }
 
 method exchange_delete ($exchange, %props) {
-#    $self->conn->exchange_delete($self->channel, $exchange, { %props });
+    $self->conn->exchange_delete($self->channel, $exchange, { %props });
 }
 
 __PACKAGE__->meta->make_immutable;
