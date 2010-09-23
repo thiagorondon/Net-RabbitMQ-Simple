@@ -135,6 +135,31 @@ sub exchange_delete (@) {
 
     $_mq->exchange_delete($exchange, %{$opt});
 }
+
+=head2 queue %hash
+
+Declare new queue.
+
+    queue {
+        name => 'foobaz',
+        passive => 0,
+        durable => 0,
+        exclusive => 0,
+        auto_delete => 1
+    };
+
+=cut
+
+sub queue (@) {
+    my ($opt) = @_;
+
+    my $queue = $opt->{name};
+    Carp::confess("please give the queue name") if !$queue;
+    delete $opt->{name};
+    
+    $_mq->queue_declare($queue, %{$opt});    
+}
+
 =head2 exchange_publish %hash
 
 Publish a new message.
@@ -270,7 +295,7 @@ sub import {
 
     my @cmds = ( 'mqconnect', 'publish', 'consume', 'purge', 'ack',
         'mqdisconnect', 'exchange', 'get', 'exchange_delete',
-        'tx', 'commit', 'rollback');
+        'tx', 'commit', 'rollback', 'queue');
 
     Devel::Declare->setup_for(
         $caller, {
