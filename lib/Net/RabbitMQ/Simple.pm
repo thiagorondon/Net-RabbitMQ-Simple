@@ -1,5 +1,5 @@
 package Net::RabbitMQ::Simple;
-our $VERSION = "0.0005";
+our $VERSION = "0.0006";
 
 use Moose;
 use 5.008001;

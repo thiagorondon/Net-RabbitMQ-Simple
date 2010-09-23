@@ -106,7 +106,10 @@ method connect {
     $self->conn($mq) ? 0 : 1;
 }
 
-method disconnect { $self->conn->disconnect(); }
+method disconnect { 
+    $self->conn->channel_close($self->channel);
+    $self->conn->disconnect(); 
+}
 
 for my $item (qw/purge ack/) {
     method "$item" ($tag) {
