@@ -12,7 +12,6 @@ extends qw/
 
 use Net::RabbitMQ;
 use Moose::Util::TypeConstraints;
-use MooseX::Method::Signatures;
 use Carp qw/ confess /;
 
 has conn => (
@@ -74,24 +73,30 @@ after channel => sub {
 };
 
 
-method _validate_vhost {
+sub _validate_vhost {
+    my $self = shift;
     Carp::confess("vhost has length > 255") if 255 < length($self->vhost)
         || $self->vhost !~ m{^[a-zA-Z0-9/\-_]+$};
 }
 
-method _check_shortstr ($arg) {
+sub _check_shortstr {
+    my $self = shift;
+    my $arg = shift;
+
     Carp::confess($self->arg . "has length > 255") if 255 < length($self->$arg)
         || $self->$arg !~ m{^[a-zA-Z0-9-_.:]+$};
 }
 
-method _validate_routing_key {
+sub _validate_routing_key {
+    my $self = shift;
     return if !$self->routing_key;
     Carp::confess('routing_key has length > 255') 
         if 255 < length($self->routing_key);
 }
 
 # connect 
-method connect {
+sub connect {
+    my $self = shift;
     my $mq = Net::RabbitMQ->new();
     $self->_validate_vhost;
     $mq->connect($self->hostname,
@@ -106,15 +111,22 @@ method connect {
     $self->conn($mq) ? 0 : 1;
 }
 
-method disconnect { 
+sub disconnect { 
+    my $self = shift;
     #$self->conn->channel_close($self->channel);
     $self->conn->disconnect(); 
 }
 
-for my $item (qw/purge ack/) {
-    method "$item" ($tag) {
-        $self->conn->$item($self->channel, $tag);
-    }
+sub purge {
+    my $self = shift;
+    my $tag = shift;
+    $self->conn->purge($self->channel, $tag);
+}
+
+sub ack {
+    my $self = shift;
+    my $tag = shift;
+    $self->conn->ack($self->channel, $tag);
 }
 
 1;

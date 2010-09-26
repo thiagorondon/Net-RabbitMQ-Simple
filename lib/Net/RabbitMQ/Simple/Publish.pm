@@ -2,7 +2,6 @@ package Net::RabbitMQ::Simple::Publish;
 
 use Moose;
 use Moose::Util::TypeConstraints;
-use MooseX::Method::Signatures;
 use namespace::autoclean;
 
 has 'body' => (
@@ -22,8 +21,11 @@ has 'immediate' => (
     default => 0
 );
 
-method publish ($body, %props) {
-    
+sub publish {
+    my $self = shift;
+    my $body = shift;
+    my %props = @_;
+
     $self->conn->publish($self->channel, $self->routing_key, $body,
         {
             exchange => $self->exchange_name,

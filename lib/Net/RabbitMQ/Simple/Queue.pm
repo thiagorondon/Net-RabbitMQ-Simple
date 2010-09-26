@@ -3,7 +3,6 @@ package Net::RabbitMQ::Simple::Queue;
 use Moose;
 
 use Moose::Util::TypeConstraints;
-use MooseX::Method::Signatures;
 use namespace::autoclean;
 
 # queue
@@ -23,19 +22,28 @@ after 'routing_key' => sub {
     $self->_validate_routing_key if $argv;
 };
 
-method queue_declare (Str $queue_name = '', %props) {
+sub queue_declare {
+    my $self = shift;
+    my $queue_name = shift || '';
+    my %props = @_;
+
     $self->queue_name($queue_name);
     $self->conn->queue_declare($self->channel, $queue_name, { %props });
 }
 
-method queue_bind (Str $routing_key = '#') {
+sub queue_bind {
+    my $self = shift;
+    my $routing_key = shift || '#';
+    
     $routing_key ||= $self->routing_key;
     $self->routing_key($routing_key);
     $self->conn->queue_bind($self->channel, $self->queue_name,
         $self->exchange_name, $routing_key);
 }
 
-method queue_unbind (Str $routing_key = '#') {
+sub queue_unbind {
+    my $self = shift;
+    my $routing_key = shift || '#';
     $self->conn->queue_unbind($self->channel, $self->queue_name,
                 $self->exchange_name, $routing_key);
 }

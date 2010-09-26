@@ -2,7 +2,6 @@ package Net::RabbitMQ::Simple::Exchange;
 
 use Moose;
 use Moose::Util::TypeConstraints;
-use MooseX::Method::Signatures;
 use namespace::autoclean;
 
 enum 'Exchange' => qw/direct topic fanout headers/;
@@ -23,7 +22,11 @@ after exchange_name => sub {
     $self->_check_shortstr('exchange_name') if $argv;
 };
 
-method exchange_declare (Str $exchange_name, %props) {
+sub exchange_declare {
+    my $self = shift;
+    my $exchange_name = shift;
+    my %props = shift;
+
     $self->exchange_name($exchange_name);
     
     $props{type} = $self->exchange_type if !defined($props{type})
@@ -36,7 +39,11 @@ method exchange_declare (Str $exchange_name, %props) {
         $self->channel, $self->exchange_name, { %props } );
 }
 
-method exchange_delete ($exchange, %props) {
+sub exchange_delete {
+    my $self = shift;
+    my $exchange = shift;
+    my %props = shift;
+
     $self->conn->exchange_delete($self->channel, $exchange, { %props });
 }
 
