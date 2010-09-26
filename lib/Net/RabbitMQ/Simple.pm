@@ -5,6 +5,7 @@ use Moose;
 use 5.008001;
 use Devel::Declare ();
 use Carp qw/ confess /;
+use namespace::autoclean;
 
 extends 'Devel::Declare::Context::Simple';
 
@@ -165,6 +166,7 @@ sub queue (@) {
 Publish a new message.
 
     {
+        channel => 1, # optional
         exchange => 'exchange',
         queue => 'queue',
         route => 'route',
@@ -178,7 +180,6 @@ sub publish (@) {
     my ($opt) = @_;
    
     $_mq->exchange_name($opt->{exchange}) if $opt->{exchange};
-
     $_mq->queue_declare($opt->{queue}, %{$opt->{queue_options}});
     $_mq->queue_bind($opt->{route});
 
