@@ -15,7 +15,8 @@ WriteMakefile(
         'namespace::autoclean' => 0.11,
         'Devel::Declare' => 0.00600,
         'MooseX::Method::Signatures' => 0.36,
-        'Net::RabbitMQ' => 0.1
+        'Net::RabbitMQ' => 0.1,
+        'Test::LeakTrace' => 0.13,
     },
     LICENSE => 'perl'
 );
