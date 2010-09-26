@@ -107,7 +107,7 @@ method connect {
 }
 
 method disconnect { 
-    $self->conn->channel_close($self->channel);
+    #$self->conn->channel_close($self->channel);
     $self->conn->disconnect(); 
 }
 
